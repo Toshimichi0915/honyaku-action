@@ -6,6 +6,7 @@ import path from "node:path"
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { createHash } from "node:crypto"
 import { setTimeout } from "timers/promises"
+import { execSync } from "child_process"
 import AdmZip from "adm-zip"
 import locales from "@/locales.json"
 
@@ -152,6 +153,13 @@ async function main() {
 
   // Update lock file
   writeFileSync(lockFile, JSON.stringify({ sha256, analysisHistoryId }, null, 2) + "\n")
+
+  // Commit changes
+  execSync("git config user.name github-actions[bot]", { stdio: "inherit" })
+  execSync("git config user.email 41898282+github-actions[bot]@users.noreply.github.com", { stdio: "inherit" })
+  execSync(`git add ${JSON.stringify(lockFile)} ${JSON.stringify(outputDir)}`, { stdio: "inherit" })
+  execSync('git commit -m "chore: update translations"', { stdio: "inherit" })
+  execSync("git push", { stdio: "inherit" })
 }
 
 main()
