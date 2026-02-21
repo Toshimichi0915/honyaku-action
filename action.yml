@@ -1,0 +1,32 @@
+name: "Honyaku Translate"
+description: "Translate files using the Honyaku API"
+
+inputs:
+  source-file:
+    description: "Path to the source translation file"
+    required: true
+  output-dir:
+    description: "Output directory for translated files"
+    required: true
+  targets:
+    description: 'A comma-separated list of target locales with the following format: "<locale>:<filename>". (e. g. "ja:ja_JP.json")'
+    required: true
+  api-key:
+    description: "API key for authentication"
+    required: true
+  translator-id:
+    description: "Translator model ID"
+    required: false
+    default: "gpt_4_1_mini"
+  custom-prompt:
+    description: "Custom prompt for the translator"
+    required: false
+    default: ""
+  base-url:
+    description: "Base URL of the Honyaku API"
+    required: false
+    default: "https://honyaku.dev/api"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

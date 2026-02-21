@@ -1,0 +1,167 @@
+import * as core from "@actions/core"
+import createClient from "openapi-fetch"
+import type { paths } from "@/generated/openapi/v1"
+import { basename } from "path"
+import path from "node:path"
+import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { setTimeout } from "timers/promises"
+import AdmZip from "adm-zip"
+import locales from "@/locales.json"
+
+const POLL_INTERVAL_MS = 10_000
+
+interface Locale {
+  id: string
+  name: string
+  endonym: string
+  bcp47: string | null
+}
+
+interface LockFile {
+  sha256: string
+  analysisHistoryId: string
+}
+
+function handle<T extends { data?: unknown; error?: unknown }>(response: T): Exclude<T["data"], null | undefined> {
+  if (response.error) {
+    throw new Error(`API error: ${JSON.stringify(response.error)}`)
+  }
+
+  return (response.data ?? {}) as Exclude<T["data"], null | undefined>
+}
+
+async function main() {
+  // Prepare
+  const sourceFile = core.getInput("source-file")
+  const outputDir = core.getInput("output-dir")
+  const baseUrl = core.getInput("base-url")
+  const apiKey = core.getInput("api-key")
+  const translatorId = core.getInput("translator-id")
+  const customPrompt = core.getInput("custom-prompt")
+  const targets = core
+    .getInput("targets")
+    .split(",")
+    .map((s) => s.split(":").map((t) => t.trim()))
+
+  const client = createClient<paths>({ baseUrl, headers: { "X-Api-Key": apiKey } })
+
+  // Check if translation is required
+  const source = readFileSync(sourceFile)
+  const sha256 = createHash("sha256").update(source).digest("hex")
+
+  const lockFile = path.join(process.cwd(), "honyaku-lock.json")
+
+  let existingAnalysisHistoryId: string | null = null
+  if (existsSync(lockFile)) {
+    const data = JSON.parse(readFileSync(lockFile, "utf-8")) as LockFile
+    existingAnalysisHistoryId = data.analysisHistoryId
+
+    if (data.sha256 === sha256) return
+  }
+
+  // Request file upload URL and fields
+  const { uploadedFileId, fields, url } = handle(await client.POST("/files", { body: { name: basename(sourceFile) } }))
+
+  // Upload file to S3
+  const form = new FormData()
+  for (const [key, value] of Object.entries(fields)) {
+    form.append(key, value)
+  }
+  form.append("file", new Blob([source]))
+  const fileUploadResponse = await fetch(url, { method: "POST", body: form })
+  if (!fileUploadResponse.ok) {
+    throw new Error(`Failed to upload file: ${fileUploadResponse.statusText}`)
+  }
+
+  // Decompile file
+  const { analysisResultId, analysisHistoryId } = handle(
+    await client.POST("/decompile", {
+      body: { uploadedFileId, analysisHistoryId: existingAnalysisHistoryId },
+    }),
+  )
+
+  // Queue translation job
+  const targetLocales = targets.map(([localeId, name]) => {
+    const locale = locales.find((l) => l.id === localeId)
+    if (!locale) {
+      throw new Error(`Invalid locale ID: ${localeId}`)
+    }
+    return [locale, name] as [Locale, string]
+  })
+
+  const { jobId } = handle(
+    await client.POST("/analysis/{analysisResultId}/translate-entries", {
+      params: {
+        path: {
+          analysisResultId,
+        },
+      },
+      body: {
+        translatorId,
+        customPrompt,
+        entries: targetLocales.map(([locale, name]) => ({
+          locale: locale!.id,
+          source: sourceFile,
+          name,
+        })),
+      },
+    }),
+  )
+
+  let status = "unknown"
+  while (status != "completed") {
+    await setTimeout(POLL_INTERVAL_MS)
+    const result = handle(
+      await client.GET("/analysis/translate-entries/{jobId}", {
+        params: {
+          path: {
+            jobId,
+          },
+        },
+      }),
+    )
+
+    status = result.status
+    core.info(`Translation job status: ${status}, remaining: ${result.remaining}`)
+
+    if (status === "failed") {
+      throw new Error("Translation job failed")
+    }
+  }
+
+  // Export translated files
+  const { url: exportUrl } = handle(
+    await client.POST("/analysis/{analysisResultId}/export", {
+      params: {
+        path: {
+          analysisResultId,
+        },
+      },
+    }),
+  )
+
+  const zipResponse = await fetch(exportUrl)
+  if (!zipResponse.ok) {
+    throw new Error(`Failed to download export zip: ${zipResponse.statusText}`)
+  }
+
+  const zipBuffer = Buffer.from(await zipResponse.arrayBuffer())
+  const zip = new AdmZip(zipBuffer)
+  zip.extractAllTo(path.join(process.cwd(), outputDir), true)
+
+  // Update lock file
+  writeFileSync(lockFile, JSON.stringify({ sha256, analysisHistoryId }, null, 2) + "\n")
+}
+
+main()
+  .then(() => {
+    core.info("Translation completed successfully")
+  })
+  .catch((error) => {
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    } else {
+      core.setFailed("An unknown error occurred")
+    }
+  })

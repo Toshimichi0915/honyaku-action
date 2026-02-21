@@ -1,0 +1,305 @@
+{
+  "servers": [
+    {
+      "url": "https://localhost:10000/api"
+    }
+  ],
+  "info": {
+    "title": "API Reference",
+    "version": "0.0.0"
+  },
+  "openapi": "3.1.1",
+  "paths": {
+    "/files": {
+      "post": {
+        "operationId": "files.createFile",
+        "summary": "Upload a file",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uploadedFileId": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "fields": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "uploadedFileId",
+                    "url",
+                    "fields"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decompile": {
+      "post": {
+        "operationId": "decompile",
+        "summary": "Decompile a file",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "analysisHistoryId": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "uploadedFileId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "analysisHistoryId",
+                  "uploadedFileId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "analysisResultId": {
+                      "type": "string"
+                    },
+                    "analysisHistoryId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "analysisResultId",
+                    "analysisHistoryId"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/{analysisResultId}/export": {
+      "post": {
+        "operationId": "analysis.export",
+        "summary": "Export a translated file",
+        "parameters": [
+          {
+            "name": "analysisResultId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/{analysisResultId}/translate-entries": {
+      "post": {
+        "operationId": "analysis.translation.queue",
+        "summary": "Translate entries",
+        "parameters": [
+          {
+            "name": "analysisResultId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "translatorId": {
+                    "type": "string"
+                  },
+                  "customPrompt": {
+                    "type": "string"
+                  },
+                  "entries": {
+                    "type": "array",
+                    "maxItems": 200,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "locale": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "source",
+                        "name",
+                        "locale"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "translatorId",
+                  "customPrompt",
+                  "entries"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobId": {
+                      "type": "string"
+                    },
+                    "pollUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "jobId",
+                    "pollUrl"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis/translate-entries/{jobId}": {
+      "get": {
+        "operationId": "analysis.translation.getResult",
+        "summary": "Get translation result",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "remaining": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "remaining"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
