@@ -1,5 +1,8 @@
 name: "Honyaku Translate"
 description: "Translate files using the Honyaku API"
+branding:
+  icon: "book"
+  color: "black"
 
 inputs:
   source-file:
