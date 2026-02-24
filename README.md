@@ -14,7 +14,7 @@ source file, translates it into multiple target languages using AI, and commits 
 ## Usage
 
 ```yaml
-- uses: toshimichi/honyaku-action@v1
+- uses: toshimichi/honyaku-action@v0
   with:
     source-file: "en_US.json"
     output-dir: "lang"
@@ -24,15 +24,15 @@ source file, translates it into multiple target languages using AI, and commits 
 
 ## Inputs
 
-| Name            | Required | Default                   | Description                                                                                                      |
-|-----------------|----------|---------------------------|------------------------------------------------------------------------------------------------------------------|
-| `source-file`   | Yes      |                           | Path to the source translation file                                                                              |
-| `output-dir`    | Yes      |                           | Output directory for translated files                                                                            |
-| `targets`       | Yes      |                           | Comma-separated list of target locales in the format `<locale>:<filename>` (e.g. `ja:ja_JP.json, ko:ko_KR.json`) |
-| `api-key`       | Yes      |                           | API key for authentication (get one at [honyaku.dev](https://honyaku.dev))                                       |
-| `translator-id` | No       | `gpt_4_1_mini`            | Translator model ID                                                                                              |
-| `custom-prompt` | No       | `""`                      | Custom prompt for the translator                                                                                 |
-| `base-url`      | No       | `https://honyaku.dev/api` | Base URL of the Honyaku API                                                                                      |
+| Name            | Required | Default                      | Description                                                                                                      |
+|-----------------|----------|------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `source-file`   | Yes      |                              | Path to the source translation file                                                                              |
+| `output-dir`    | Yes      |                              | Output directory for translated files                                                                            |
+| `targets`       | Yes      |                              | Comma-separated list of target locales in the format `<locale>:<filename>` (e.g. `ja:ja_JP.json, ko:ko_KR.json`) |
+| `api-key`       | Yes      |                              | API key for authentication (get one at [honyaku.dev](https://honyaku.dev))                                       |
+| `translator-id` | No       | `gpt_4_1_mini`               | Translator model ID                                                                                              |
+| `custom-prompt` | No       | `""`                         | Custom prompt for the translator                                                                                 |
+| `base-url`      | No       | `https://honyaku.dev/api/v1` | Base URL of the Honyaku API                                                                                      |
 
 ## Example Workflow
 
