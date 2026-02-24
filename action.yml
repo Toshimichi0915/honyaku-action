@@ -28,7 +28,7 @@ inputs:
   base-url:
     description: "Base URL of the Honyaku API"
     required: false
-    default: "https://honyaku.dev/api"
+    default: "https://honyaku.dev/api/v1"
 
 runs:
   using: "node20"
