@@ -77,7 +77,7 @@ async function main() {
 
   // Decompile file
   const { analysisResultId, analysisHistoryId } = handle(
-    await client.POST("/decompile", {
+    await client.POST("/decompilations", {
       body: { uploadedFileId, analysisHistoryId: existingAnalysisHistoryId },
     }),
   )
@@ -92,7 +92,7 @@ async function main() {
   })
 
   const { jobId } = handle(
-    await client.POST("/analysis/{analysisResultId}/translate-entries", {
+    await client.POST("/analysis/{analysisResultId}/entry-translations", {
       params: {
         path: {
           analysisResultId,
@@ -114,9 +114,10 @@ async function main() {
   while (status != "completed") {
     await setTimeout(POLL_INTERVAL_MS)
     const result = handle(
-      await client.GET("/analysis/translate-entries/{jobId}", {
+      await client.GET("/analysis/{analysisResultId}/entry-translations/{jobId}", {
         params: {
           path: {
+            analysisResultId,
             jobId,
           },
         },
@@ -133,7 +134,7 @@ async function main() {
 
   // Export translated files
   const { url: exportUrl } = handle(
-    await client.POST("/analysis/{analysisResultId}/export", {
+    await client.POST("/analysis/{analysisResultId}/exports", {
       params: {
         path: {
           analysisResultId,

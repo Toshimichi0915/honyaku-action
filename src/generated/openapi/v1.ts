@@ -21,7 +21,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/decompile": {
+    "/decompilations": {
         parameters: {
             query?: never;
             header?: never;
@@ -38,7 +38,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/analysis/{analysisResultId}/export": {
+    "/analysis/{analysisResultId}/exports": {
         parameters: {
             query?: never;
             header?: never;
@@ -55,7 +55,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/analysis/{analysisResultId}/translate-entries": {
+    "/analysis/{analysisResultId}/entry-translations": {
         parameters: {
             query?: never;
             header?: never;
@@ -72,7 +72,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/analysis/translate-entries/{jobId}": {
+    "/analysis/{analysisResultId}/entry-translations/{jobId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -233,6 +233,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                analysisResultId: string;
                 jobId: string;
             };
             cookie?: never;
