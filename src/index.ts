@@ -48,7 +48,7 @@ async function main() {
   const client = createClient<paths>({ baseUrl, headers: { "X-Api-Key": apiKey } })
 
   // Check if translation is required
-  const source = readFileSync(sourceFile)
+  const source = readFileSync(path.join(process.cwd(), sourceFile))
   const sha256 = createHash("sha256").update(source).digest("hex")
 
   const lockFile = path.join(process.cwd(), "honyaku-lock.json")
@@ -150,7 +150,10 @@ async function main() {
 
   const zipBuffer = Buffer.from(await zipResponse.arrayBuffer())
   const zip = new AdmZip(zipBuffer)
-  zip.extractAllTo(path.join(process.cwd(), outputDir), true)
+  for (const entry of zip.getEntries()) {
+    if (entry.entryName.endsWith(sourceFile)) continue
+    zip.extractEntryTo(entry, outputDir, false, true)
+  }
 
   // Update lock file
   writeFileSync(lockFile, JSON.stringify({ sha256, analysisHistoryId }, null, 2) + "\n")
