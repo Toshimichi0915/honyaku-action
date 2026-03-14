@@ -5,7 +5,6 @@ source file, translates it into multiple target languages using AI, and commits 
 
 ## Features
 
-- AI-powered translation with multiple translator models (GPT-4.1 mini, Claude Haiku 4.5, etc.)
 - Supports 180+ languages
 - Incremental translation using a lock file (`honyaku-lock.json`) to skip unchanged files
 - Automatically commits and pushes translated files
@@ -30,7 +29,6 @@ source file, translates it into multiple target languages using AI, and commits 
 | `output-dir`    | Yes      |                              | Output directory for translated files                                                                            |
 | `targets`       | Yes      |                              | Comma-separated list of target locales in the format `<locale>:<filename>` (e.g. `ja:ja_JP.json, ko:ko_KR.json`) |
 | `api-key`       | Yes      |                              | API key for authentication (get one at [honyaku.dev](https://honyaku.dev))                                       |
-| `translator-id` | No       | `gpt_4_1_mini`               | Translator model ID                                                                                              |
 | `custom-prompt` | No       | `""`                         | Custom prompt for the translator                                                                                 |
 | `base-url`      | No       | `https://honyaku.dev/api/v1` | Base URL of the Honyaku API                                                                                      |
 

@@ -38,7 +38,6 @@ async function main() {
   const outputDir = core.getInput("output-dir")
   const baseUrl = core.getInput("base-url")
   const apiKey = core.getInput("api-key")
-  const translatorId = core.getInput("translator-id")
   const customPrompt = core.getInput("custom-prompt")
   const targets = core
     .getInput("targets")
@@ -99,7 +98,6 @@ async function main() {
         },
       },
       body: {
-        translatorId,
         customPrompt,
         entries: targetLocales.map(([locale, name]) => ({
           locale: locale!.id,

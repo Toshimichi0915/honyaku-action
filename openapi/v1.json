@@ -196,9 +196,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "translatorId": {
-                    "type": "string"
-                  },
                   "customPrompt": {
                     "type": "string"
                   },
@@ -227,7 +224,6 @@
                   }
                 },
                 "required": [
-                  "translatorId",
                   "customPrompt",
                   "entries"
                 ]
