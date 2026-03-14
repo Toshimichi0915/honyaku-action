@@ -23230,7 +23230,6 @@ async function main() {
   const outputDir = getInput("output-dir");
   const baseUrl = getInput("base-url");
   const apiKey = getInput("api-key");
-  const translatorId = getInput("translator-id");
   const customPrompt = getInput("custom-prompt");
   const targets = getInput("targets").split(",").map((s) => s.split(":").map((t) => t.trim()));
   const client = createClient({ baseUrl, headers: { "X-Api-Key": apiKey } });
@@ -23273,7 +23272,6 @@ async function main() {
         }
       },
       body: {
-        translatorId,
         customPrompt,
         entries: targetLocales.map(([locale, name]) => ({
           locale: locale.id,
